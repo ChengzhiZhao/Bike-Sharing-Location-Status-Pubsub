@@ -15,7 +15,7 @@ import (
 
 const (
 	ENDPOINT = "wss://open-data.api.satori.com"
-	// APP_KEY  = "b78adebf97eBe26FDcD4CD1B82c56a2f"
+	// APP_KEY  = "Add your api key"
 	CHANNEL = "US-Bike-Sharing-Channel"
 	SUBJECT = "US-Bike-Sharing-Channel"
 )

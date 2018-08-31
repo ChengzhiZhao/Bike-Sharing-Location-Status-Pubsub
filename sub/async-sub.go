@@ -10,6 +10,22 @@ import (
 	"github.com/nats-io/go-nats"
 )
 
+func addGeolocation(client *redis.Client, data map[string]interface{}, msg *nats.Msg, id, countryCode, log, lat string) {
+	if _, ok := data[id].(string); ok {
+		err := client.GeoAdd(data[countryCode].(string),
+			&redis.GeoLocation{Longitude: data[log].(float64), Latitude: data[lat].(float64), Name: string(msg.Data)}).Err()
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		err := client.GeoAdd(data[countryCode].(string),
+			&redis.GeoLocation{Longitude: data[log].(float64), Latitude: data[lat].(float64), Name: string(msg.Data)}).Err()
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
 func main() {
 	// Create server connection
 	natsConnection, _ := nats.Connect(nats.DefaultURL)
@@ -34,33 +50,9 @@ func main() {
 		data := dataRaw.(map[string]interface{})
 
 		if data["station_id"] != nil {
-			if _, ok := data["station_id"].(string); ok {
-				err := client.GeoAdd(data["country_code"].(string),
-					&redis.GeoLocation{Longitude: data["lon"].(float64), Latitude: data["lat"].(float64), Name: string(msg.Data)}).Err()
-				if err != nil {
-					panic(err)
-				}
-			} else {
-				err := client.GeoAdd(data["country_code"].(string),
-					&redis.GeoLocation{Longitude: data["lon"].(float64), Latitude: data["lat"].(float64), Name: string(msg.Data)}).Err()
-				if err != nil {
-					panic(err)
-				}
-			}
+			addGeolocation(client, data, msg, "station_id", "country_code", "lon", "lat")
 		} else {
-			if _, ok := data["id"].(string); ok {
-				err := client.GeoAdd(data["country_code"].(string),
-					&redis.GeoLocation{Longitude: data["longitude"].(float64), Latitude: data["latitude"].(float64), Name: string(msg.Data)}).Err()
-				if err != nil {
-					panic(err)
-				}
-			} else {
-				err := client.GeoAdd(data["country_code"].(string),
-					&redis.GeoLocation{Longitude: data["longitude"].(float64), Latitude: data["latitude"].(float64), Name: string(msg.Data)}).Err()
-				if err != nil {
-					panic(err)
-				}
-			}
+			addGeolocation(client, data, msg, "id", "country_code", "longitude", "latitude")
 		}
 	})
 
